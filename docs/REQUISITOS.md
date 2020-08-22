@@ -22,7 +22,7 @@ O sistema deve permitir a listagem das tarefas cadastradas
 ## Requisitos Não Funcionais
 
 ### [RNF001] Sistema Web
-O sistema deve ser online, com aceso web via browsers
+O sistema deve ser online, com acesso web via browsers
 
 ### [RNF002] Interoperabilidade
 O sistema deve ser compatível com os browsers: 
