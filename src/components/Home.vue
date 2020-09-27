@@ -1,9 +1,22 @@
 <template>
     <div>
-        <v-card v-for="item in tarefas" :key="item.titulo">
-          <v-card-title>{{item.titulo}}</v-card-title>
-            <v-card-text>{{item.descricao}}</v-card-text>
-        </v-card>
+        <v-row justify="center" class="my-5" v-if="loading">
+            <v-col cols="auto">
+                <v-progress-circular
+                    indeterminate
+                    color="primary">
+                </v-progress-circular>
+
+            </v-col>    
+        </v-row>    
+        <v-row v-else>
+            <v-col v-for="item in tarefas" :key="item.titulo" cols="12" nd="6" lg="3" xl="2"> 
+                <v-card>
+                  <v-card-title>{{item.titulo}}</v-card-title>
+                  <v-card-text>{{item.descricao}}</v-card-text>
+               </v-card>
+            </v-col>
+        </v-row>
 
         <v-speed-dial absolute bottom right>
               <template v-slot:activator>
@@ -38,9 +51,11 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
     data(){
         return {
+            loading: true,
             dialog: false,
             tarefa: {},
             tarefas: []
@@ -50,11 +65,21 @@ export default {
       novaTarefa(){
           this.dialog = true
       },
-      salvar(){
-          this.tarefas.push(this.tarefa)
+    async  salvar(){
+          await axios.post('http://localhost:3000/tarefas', this.tarefa)
+          this.buscarTarefas()
           this.tarefa={}
           this.dialog = false
+      },
+      async buscarTarefas(){
+         this.loading = true 
+         const resposta = await axios.get('http://localhost:3000/tarefas')
+         this.tarefas = resposta.data
+         this.loading = false
       }
-  } 
+  } ,
+  mounted(){
+      this.buscarTarefas()
+  }
 }
 </script>
