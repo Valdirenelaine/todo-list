@@ -12,7 +12,13 @@
         <v-row v-else>
             <v-col v-for="item in tarefas" :key="item.titulo" cols="12" nd="6" lg="3" xl="2"> 
                 <v-card>
-                  <v-card-title>{{item.titulo}}</v-card-title>
+                   <v-card-title>
+                      {{item.titulo}}
+                      <v-spacer></v-spacer>
+                      <v-btn icon small @click="editarTarefa(item)">
+                          <v-icon>mdi-pencil</v-icon>
+                      </v-btn>    
+                   </v-card-title>
                   <v-card-text>{{item.descricao}}</v-card-text>
                </v-card>
             </v-col>
@@ -26,7 +32,7 @@
             </template>
         </v-speed-dial>
 
-        <v-dialog v-model="dialog"> 
+        <v-dialog v-model="dialog" width="600px"> 
             <v-card>
                 <v-card-title>Nova Tarefa</v-card-title>
                 <v-card-text>
@@ -39,8 +45,12 @@
                                 <v-text-field  v-model="tarefa.descricao"  type="text" label="Descrição" outlined></v-text-field>
                             </v-col>
                             <v-col cols ="12"> 
-                                <v-btn color="primary" class="elevation-0" block rounded @click="salvar">Salvar</v-btn>
+                                <v-btn :loading="saving" color="primary" class="elevation-0" block rounded @click="salvar">Salvar</v-btn>
                             </v-col>
+                            <v-col COLS="12">
+                                <v-btn :disabled="saving" color="error lighten-2" class="elevation-0"   block rounded text @click="excluirTarefa">Excluir Tarefa</v-btn>
+                            </v-col>
+                            
                         </v-row>
                     </v-form>
                 </v-card-text>
@@ -56,6 +66,7 @@ export default {
     data(){
         return {
             loading: true,
+            saving : false,
             dialog: false,
             tarefa: {},
             tarefas: []
@@ -66,9 +77,14 @@ export default {
           this.dialog = true
       },
     async  salvar(){
-          await axios.post('http://localhost:3000/tarefas', this.tarefa)
+        this.saving = true
+        if (this.tarefa._id) await axios.put('http://localhost:3000/tarefas', this.tarefa)
+        else  await axios.post('http://localhost:3000/tarefas', this.tarefa)
+
+    
           this.buscarTarefas()
           this.tarefa={}
+          this.saving = false
           this.dialog = false
       },
       async buscarTarefas(){
@@ -76,6 +92,15 @@ export default {
          const resposta = await axios.get('http://localhost:3000/tarefas')
          this.tarefas = resposta.data
          this.loading = false
+      },
+      editarTarefa(tarefa){
+          this.tarefa = JSON.parse(JSON.stringify(tarefa)) // clonando o objeto
+          this.dialog = true
+      },
+     async excluirTarefa(){
+         await axios.delete(`http://localhost:3000/tarefas/${this.tarefa._id}`)
+         this.buscarTarefas()
+         this.dialog =false
       }
   } ,
   mounted(){
